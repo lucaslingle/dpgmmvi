@@ -206,13 +206,13 @@ def get_dataset(*, config):
 
 
 if __name__ == '__main__':
-    st.set_page_config(page_title="Simple VDP: Cluster Fitting in 2D", layout="centered")
-    st.title("Simple VDP: Cluster Fitting in 2D")
+    st.set_page_config(page_title="DPGMM variational inference in 2D", layout="centered")
+    st.title("DPGMM variational inference in 2D")
 
-    minibatch_size = st.select_slider("Batch Size", options=[20, 200, 2000], value=2000)
+    minibatch_size = st.select_slider("Minibatch Size", options=[20, 200, 2000], value=2000)
     truncation_level = st.select_slider("Truncation Level", options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], value=10)
     opt_iters = 100
-    kappa = st.number_input("Learning Rate", value=0.001, format="%.4f")
+    kappa = st.number_input("SVI Learning Rate", value=0.001, format="%.4f")
 
     config = Config(
         truncation_level=truncation_level,
@@ -227,7 +227,8 @@ if __name__ == '__main__':
     state = VDPState(config=config, logger=logging.getLogger(__name__))
     states = [state]
     for _ in range(opt_iters):
-        new_state = state.run_vi_update(xs_minibatch=xs)
+        batch_indices = np.random.choice(config.trainset_size, size=minibatch_size, replace=False)
+        new_state = state.run_vi_update(xs_minibatch=xs[batch_indices])
         elbo = state.get_elbo_normalized(xs_eval=xs)
         print(elbo)
         states.append(state)
