@@ -205,34 +205,22 @@ def get_dataset(*, config):
     return xs
 
 
-if __name__ == '__main__':
-    st.set_page_config(page_title="DPGMM variational inference in 2D", layout="centered")
-    st.title("DPGMM variational inference in 2D")
-
-    minibatch_size = st.select_slider("Minibatch Size", options=[20, 200, 2000], value=2000)
-    truncation_level = st.select_slider("Truncation Level", options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], value=10)
-    opt_iters = 100
-    kappa = st.number_input("SVI Learning Rate", value=0.001, format="%.4f")
-
-    config = Config(
-        truncation_level=truncation_level,
-        sigma_c=1.0,
-        sigma_x=0.05,
-        trainset_size=2000,
-        data_dim=2,
-        kappa=kappa,
-    )
-    np.random.seed(42)
-    xs = get_dataset(config=config)
+@st.cache_data
+def vi_loop(*, config, minibatch_size, opt_iters, xs_train, streamlit_info=False):
     state = VDPState(config=config, logger=logging.getLogger(__name__))
+    elbo = state.get_elbo_normalized(xs_eval=xs_train)
     states = [state]
+    elbos = [elbo]
     for _ in range(opt_iters):
         batch_indices = np.random.choice(config.trainset_size, size=minibatch_size, replace=False)
-        new_state = state.run_vi_update(xs_minibatch=xs[batch_indices])
-        elbo = state.get_elbo_normalized(xs_eval=xs)
+        state = state.run_vi_update(xs_minibatch=xs_train[batch_indices])
+        elbo = state.get_elbo_normalized(xs_eval=xs_train)
         print(elbo)
         states.append(state)
-        state = new_state
+        elbos.append(elbo)
+    
+    if not streamlit_info:
+        return dict(states=states, elbos=elbos, streamlit_df=None)
 
     dfs = []
     for i in range(config.truncation_level):
@@ -245,13 +233,12 @@ if __name__ == '__main__':
         })
         dfs.append(df)
     df = pd.concat(dfs, ignore_index=True)
+    return dict(states=states, elbos=elbos, streamlit_df=df)
 
-    st.write("Use the slider to change the time step.")
-    current_step = st.slider(
-        "Select Time Step", min_value=0, max_value=opt_iters, value=0, step=1
-    )
-    filtered_df = df[df["timestep"] == current_step]
 
+def streamlit_plot(*, xs, df, view_iter):
+    st.write("Legend: radius proportional to stddev, opacity to mixture weight")
+    filtered_df = df[df["timestep"] == view_iter]
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -278,3 +265,33 @@ if __name__ == '__main__':
         )
     )
     st.plotly_chart(fig, use_container_width=True)
+
+
+if __name__ == '__main__':
+    np.random.seed(42)
+
+    st.set_page_config(page_title="DPGMM variational inference in 2D", layout="centered")
+    st.title("DPGMM variational inference in 2D")
+    truncation_level = st.select_slider("Truncation Level", options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], value=10)
+    minibatch_size = st.select_slider("SVI Minibatch Size", options=[20, 200, 2000], value=2000)
+    kappa = st.number_input("SVI Learning Rate", value=0.001, format="%.4f")
+    opt_iters = 100
+    view_iter = st.slider("SVI Time Step", min_value=0, max_value=opt_iters, value=0, step=1)
+    
+    config = Config(
+        truncation_level=truncation_level,
+        sigma_c=1.0,
+        sigma_x=0.05,
+        trainset_size=2000,
+        data_dim=2,
+        kappa=kappa,
+    )
+    xs = get_dataset(config=config)
+    ret = vi_loop(
+        config=config, 
+        minibatch_size=minibatch_size, 
+        opt_iters=opt_iters,
+        xs_train=xs,
+        streamlit_info=True,
+    )
+    streamlit_plot(xs=xs, df=ret['streamlit_df'], view_iter=view_iter)
