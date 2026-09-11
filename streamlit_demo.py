@@ -111,7 +111,6 @@ class SimpleVI:
         cumulative = np.cumsum(pad, axis=-1)
         unflip = cumulative[:, ::-1]  # [N, T]
         qv_nu_2 = (pv.beta - 1) + np.sum(unflip, axis=0)  # [T]
-        
         qv_nu_1 = kappa * qv_nu_1 + (1 - kappa) * (qv.alpha - 1)
         qv_nu_2 = kappa * qv_nu_2 + (1 - kappa) * (qv.beta - 1)
         return BetaDist(alpha=qv_nu_1 + 1, beta=qv_nu_2 + 1)
@@ -195,24 +194,6 @@ class SimpleVI:
         minus_prod = np.cumprod(minus, axis=0)  # [T]
         minus_prod = np.pad(minus_prod[0:-1], ((1, 0)), mode='constant', constant_values=1.0)
         return means * minus_prod
-
-    def permute_cluster_ids(self, *, qc, qv, qz):
-        stick_means = self.get_mean_stick_lengths(qv=qv)
-        sort_idxs = np.argsort(stick_means)[::-1]
-        qc_new = GaussianDist(
-            mean=np.take_along_axis(qc.mean, sort_idxs[..., None], axis=0), 
-            stddev=np.take_along_axis(qc.stddev, sort_idxs, axis=0),
-        )
-        qv_new = BetaDist(
-            alpha=np.take_along_axis(qv.alpha, sort_idxs, axis=0), 
-            beta=np.take_along_axis(qv.beta, sort_idxs, axis=0), 
-        )
-        qz_new = CategoricalDist(
-            headprobs=np.take_along_axis(qz.headprobs, sort_idxs[None, ...], axis=1), 
-            headsum=np.take_along_axis(qz.headsum, sort_idxs, axis=0),
-            stabilizer=qz.stabilizer,
-        )
-        return qc_new, qv_new, qz_new
 
     def print_stick_lengths(self, *, qv):
         stick_means = self.get_mean_stick_lengths(qv=qv)
