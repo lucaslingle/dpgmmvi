@@ -28,7 +28,7 @@ def streamlit_info(*, config, minibatch_size, opt_iters, xs_train):
             "timestep": range(opt_iters + 1), 
             "x": [state.qc.mean[i][0] for state in states], 
             "y": [state.qc.mean[i][1] for state in states],
-            "weight": [state.get_mean_stick_lengths()[i] for state in states],
+            "opacity": [state.get_mean_stick_lengths()[i] for state in states],
             "size": [state.qc.stddev[i] * 10_000 for state in states]
         })
         dfs.append(df)
@@ -49,7 +49,7 @@ def streamlit_plot(*, xs, df, view_iter):
                 size=filtered_df["size"], 
                 sizemode="diameter",                 
                 sizemin=4,
-                opacity=filtered_df["weight"],
+                opacity=filtered_df["opacity"],
             )
         )
     )
