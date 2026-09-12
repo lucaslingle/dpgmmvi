@@ -61,9 +61,17 @@ class VDPState:
         line_11 = digamma(qv.alpha) - digamma(qv.alpha + qv.beta)  # [T]
         line_12 = digamma(qv.beta) - digamma(qv.alpha + qv.beta)  # [T]
         D = xs_minibatch.shape[-1]
-        trace_term = (D * qc.stddev ** 2) / (sx ** 2)
-        line_13 = np.einsum('ld,md->ml', qc.mean / (sx ** 2), xs_minibatch) + \
-            -0.5 * (np.einsum('ld,ld->l', qc.mean / (sx ** 2), qc.mean) + trace_term)[None, ...] # [N, T]
+        line_13_a = (
+            -0.5 * D * np.log(2 * np.pi) 
+            - 0.5 * D * np.log(sx ** 2) 
+            - 0.5 * (sx ** -2) * np.einsum('md,md->m', xs_minibatch, xs_minibatch)
+        )[..., None]
+        line_13_b = np.einsum('td,md->mt', qc.mean / (sx ** 2), xs_minibatch)
+        line_13_c = -0.5 * (
+            np.einsum('td,td->t', qc.mean / (sx ** 2), qc.mean) 
+            + (D * qc.stddev ** 2) / (sx ** 2)
+        )[None, ...]
+        line_13 = line_13_a + line_13_b + line_13_c  # [M, T]
         S_n_i = (
             line_11[None,...] + 
             np.cumsum(np.concatenate([np.array([0]), line_12[:-1]], axis=0), axis=0)[None, ...] + 
