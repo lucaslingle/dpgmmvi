@@ -40,7 +40,9 @@ Full-batch variational Bayes corresponds to `kappa=1.0` and `minibatch_size=N`.
 
 ### Streamlit Visualizations
 
-To run the streamlit visualizations as a webapp, visit https://dpgmmvi-2d.streamlit.app/ or https://dpgmmvi-3d.streamlit.app/ for clustering in 2D, or clustering in 3D!
+To run the streamlit visualizations as a webapp, visit:
+- https://dpgmmvi-2d.streamlit.app/ for clustering in 2D, or
+- https://dpgmmvi-3d.streamlit.app/ for clustering in 3D!
 
 To run the streamlit visualizations locally, you can run either of
 ```
