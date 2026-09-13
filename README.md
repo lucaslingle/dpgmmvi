@@ -1,6 +1,6 @@
 # dpgmmvi
 
-### Description ![Variational Dirichlet Process](https://github.com/lucaslingle/simple_vdp/blob/main/elbo.png?raw=true)
+![Variational Dirichlet Process](https://github.com/lucaslingle/simple_vdp/blob/main/elbo.png?raw=true)
 
 ### Contents
 
