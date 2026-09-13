@@ -1,7 +1,5 @@
 # dpgmmvi
 
-![Variational Dirichlet Process](https://github.com/lucaslingle/simple_vdp/blob/main/elbo.png?raw=true)
-
 ### Contents
 
 My original implementation of the Variational Dirichlet Process algorithm from [Kurihara et al., 2007a](https://proceedings.neurips.cc/paper_files/paper/2006/file/2bd235c31c97855b7ef2dc8b414779af-Paper.pdf) is available in `legacy/nested_vi.py`. I also support a simpler algorithm in `legacy/simple_vi.py` from [Kurihara et al., 2007b](https://www.ijcai.org/Proceedings/07/Papers/449.pdf) mentioned on my [blog](https://lucaslingle.substack.com/p/simplified-variational-inference) that performs slightly better in terms of [ELBO](https://en.wikipedia.org/wiki/Evidence_lower_bound). 
