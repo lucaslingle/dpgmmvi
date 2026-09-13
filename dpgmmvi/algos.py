@@ -3,7 +3,7 @@ import numpy as np
 from scipy.special import gammaln, digamma
 import logging
 
-logging.basicConfig(level=logging.INFO, force=True)
+logging.basicConfig(level=logging.ERROR, force=True)
 Config = namedtuple("Config", ["truncation_level", "sigma_c", "sigma_x", "kappa", "trainset_size", "data_dim"])
 
 BetaDist = namedtuple("BetaDist", ["alpha", "beta"])
