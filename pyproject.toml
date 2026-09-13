@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dpgmmvi"
+version = "0.1.0"
+description = "Variational inference for Dirichlet process Gaussian mixture models"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.9"
+authors = [
+    { name = "Lucas Lingle", email = "lucasdaxlingle@gmail.com" },
+]
+dependencies = [
+    "numpy~=2.4.6",
+    "scipy~=1.17.1",
+    "pandas~=3.0.5",
+    "streamlit~=1.62.0",
+    "plotly~=6.9.0",
+]
+
+[project.urls]
+Repository = "https://github.com/lucaslingle/dpgmmvi"
+
+[tool.setuptools]
+packages = ["dpgmmvi"]
